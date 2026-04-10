@@ -32,6 +32,8 @@ RUN mkdir -p /etc/apt/keyrings \
 # Install ROS 2 Humble desktop
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-humble-desktop \
+    ros-humble-turtlebot3-description \
+    ros-humble-turtlebot3-gazebo \
     ros-humble-nav* \
     ros-humble-cartographer* \
     && rm -rf /var/lib/apt/lists/*

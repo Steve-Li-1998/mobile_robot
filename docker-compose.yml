@@ -6,12 +6,13 @@ x-ros-common: &ros-common
       USERNAME: ${ROS_USERNAME:-ros}
       USER_UID: 1000
       USER_GID: 1000
-  image: ros2-humble:dev
   network_mode: host
   environment:
     - ROS_DOMAIN_ID=0
     - ROS_LOCALHOST_ONLY=0
-    - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+    - RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+    - FASTDDS_BUILTIN_TRANSPORTS=UDPv4
+    - TURTLEBOT3_MODEL=${TURTLEBOT3_MODEL:-waffle}
     - DISPLAY=${DISPLAY:-:0}
     - QT_X11_NO_MITSHM=1
   volumes:
@@ -24,33 +25,36 @@ x-ros-common: &ros-common
 services:
   ros2_humble:
     <<: *ros-common
-    container_name: ros2-humble
+    container_name: mobile_robotics_ros2-humble
     # user: "${LOCAL_UID:-1000}:${LOCAL_GID:-1000}"
     command: []
 
   gazebo:
     <<: *ros-common
-    container_name: gazebo
-    command: ["ros2", "launch", "turtlebot3_gazebo", "turtlebot3_world.launch.py"]
+    container_name: mobile_robotics_gazebo
+    command: ["ros2", "launch", "/home/${ROS_USERNAME:-ros}/workspace/scripts/turtlebot3_world_resilient.launch.py"]
 
   rviz:
     <<: *ros-common
-    container_name: rviz
+    container_name: mobile_robotics_rviz
     command: ["rviz2"]
 
   matlab:
     image: mathworks/matlab:r2024a
-    container_name: matlab
+    container_name: mobile_robotics_matlab
     user: "${LOCAL_UID:-1000}:${LOCAL_GID:-1000}"
     network_mode: host
     environment:
       - ROS_DOMAIN_ID=0
       - ROS_LOCALHOST_ONLY=0
-      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+      - DISPLAY=${DISPLAY:-:0}
+      - QT_X11_NO_MITSHM=1
+      # - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
       # Set your license info before startup if needed.
       # Example: MLM_LICENSE_FILE=27000@your-license-server
       - MLM_LICENSE_FILE=${MLM_LICENSE_FILE:-}
     volumes:
       - ./workspace:/home/${ROS_USERNAME:-ros}/workspace
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
     stdin_open: true
     tty: true

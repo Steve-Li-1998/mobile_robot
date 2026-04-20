@@ -40,9 +40,16 @@ services:
     command: ["rviz2"]
 
   matlab:
-    image: mathworks/matlab:r2024a
+    build:
+      context: .
+      dockerfile: Dockerfile.matlab
+      args:
+        MATLAB_RELEASE: ${MATLAB_RELEASE:-R2024a}
+        MATLAB_PRODUCT_LIST: ${MATLAB_PRODUCT_LIST:-MATLAB Simulink Computer_Vision_Toolbox Control_System_Toolbox Curve_Fitting_Toolbox Image_Processing_Toolbox Optimization_Toolbox Robotics_System_Toolbox ROS_Toolbox Statistics_and_Machine_Learning_Toolbox Symbolic_Math_Toolbox}
+        MPM_ADDITIONAL_FLAGS: ${MPM_ADDITIONAL_FLAGS:-}
+    image: mobile_robotics_matlab:${MATLAB_RELEASE:-R2024a}
     container_name: mobile_robotics_matlab
-    user: "${LOCAL_UID:-1000}:${LOCAL_GID:-1000}"
+    shm_size: "1gb"
     network_mode: host
     environment:
       - ROS_DOMAIN_ID=0
@@ -56,5 +63,6 @@ services:
     volumes:
       - ./workspace:/home/${ROS_USERNAME:-ros}/workspace
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    restart: "no"
     stdin_open: true
     tty: true
